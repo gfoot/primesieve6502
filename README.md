@@ -12,16 +12,16 @@ the code to make it run faster, especially when updating the sieve.
 
 The sieve ends up looking like this:
 
-
-  address    base      bit 7  bit 6  bit 5  bit 4  bit 3  bit 2  bit 1  bit 0
-     0         0         1      7     11     13     17     19     23     29
-     1        30        31     37     41     43     47     49     53     59
-     2        60        61     67     71     73     77     79     83     89
-    ...
-     7       210       211    217    221    223    227    229    233    239
-     8       240        .      .      .      .      .     289     .      .
-    ...
-    11       330        .      .     341     .      .      .      .      .
+| address |  base  | bit 7 | bit 6 | bit 5 | bit 4 | bit 3 | bit 2 | bit 1 | bit 0 |
+| ------- |  ----  | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- |
+|    0    |    0   |    1  |    7  |   11  |   13  |   17  |   19  |   23  |   29  |
+|    1    |   30   |   31  |   37  |   41  |   43  |   47  |   49  |   53  |   59  |
+|    2    |   60   |   61  |   67  |   71  |   73  |   77  |   79  |   83  |   89  |
+|   ...   |    .   |   .   |   .   |   .   |   .   |   .   |   .   |   .   |   .   |
+|    7    |  210   |  211  |  217  |  221  |  223  |  227  |  229  |  233  |  239  |
+|    8    |  240   |   .   |   .   |   .   |   .   |   .   |  289  |   .   |   .   |
+|   ...   |    .   |   .   |   .   |   .   |   .   |   .   |   .   |   .   |   .   |
+|   11    |  330   |   .   |   .   |  341  |   .   |   .   |   .   |   .   |   .   |
 
 
 Note that each memory address represents values 30 higher than the previous
