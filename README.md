@@ -1,8 +1,9 @@
 # Prime sieve implementation for 6502
 
-On my 6502 system running at 32.768MHz this finds all the primes up to about 950,000 in about 1.3 seconds.
+On my 6502 system running at 32.768MHz this finds all the primes up to about 950,000 in about 0.563 seconds.
 
-It uses mod-30 repetition to pack the bitfield and accelerate its operation somewhat.
+It uses mod-30 repetition to pack the bitfield so that it can almost reach 1 million within 32K of RAM, and to
+accelerate its operation somewhat.
 
 For any prime p greater than 5, the remainder on division by 30 will be within the set {1,7,11,13,17,19,23,29} 
 because the other numbers are all multiples of divisors of 30.  So we only need to store bits for these 

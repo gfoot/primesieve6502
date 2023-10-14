@@ -252,16 +252,36 @@ loop:
 	lda data_lowprimes_lo,y : sta zp_n
 	lda data_lowprimes_hi,y : sta zp_n+1
 
-elimloop:
+	bne elimloop_large_n
+
+elimloop_small_n:
+	; carry is clear
 	lda #$80 : sta (zp_elimptr)
-	clc
+
+	lda zp_elimptr : adc zp_n : sta zp_elimptr
+	bcc elimloop_small_n
+	lda zp_elimptr+1 : adc zp_n+1 : sta zp_elimptr+1
+
+	; Stop after end of sieve
+	; Note carry is clear by this point so add 1 less than otherwise to data_sieve
+	sbc #>data_sieve_end - $100
+	bcc elimloop_small_n
+
+	bra store_residue
+
+elimloop_large_n:
+	; carry is clear
+	lda #$80 : sta (zp_elimptr)
+
 	lda zp_elimptr : adc zp_n : sta zp_elimptr
 	lda zp_elimptr+1 : adc zp_n+1 : sta zp_elimptr+1
 
 	; Stop after end of sieve
 	; Note carry is clear by this point so add 1 less than otherwise to data_sieve
-	sbc #>data_sieve_end - $100 : bcc elimloop
+	sbc #>data_sieve_end - $100
+	bcc elimloop_large_n
 
+store_residue:
 	; Store the new residue
 	sta data_residues_hi,y
 	lda zp_elimptr : sta data_residues_lo,y

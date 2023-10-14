@@ -7,6 +7,8 @@
 ; getting one bit within the byte.
 
 
+#include "boot64.inc"
+
 #include "utils/via.s"
 
 ;#define VERBOSE
@@ -119,15 +121,24 @@ prime:
 	plx
 #endif
 
+.(
 	; carry already clear
 	lda zp_nprimes : adc #1 : sta zp_nprimes
-	lda zp_nprimes+1 : adc #0 : sta zp_nprimes+1
-	lda zp_nprimes+2 : adc #0 : sta zp_nprimes+2
+	bcc nocarry
+	inc zp_nprimes+1
+	bne nocarry
+	inc zp_nprimes+2
+nocarry:
+.)
 
 	; If n is really large, we don't need to update the sieve
+	; Compare against 1024 as that's more than the square root of the sieve size
 	lda zp_n+2 : bne continue
-	lda zp_n+1 : bmi continue
+	lda #>975 : cmp zp_n+1 : bcc continue   ; inverted test so that carry is clear if we branch
+	bne doupdate
+	lda #<975 : cmp zp_n : bcc continue
 
+doupdate:
 	; Update the sieve - this is trickier than usual.  We do one bit at a time.  For each bit,
 	; we need to set it on every nth byte where n is the current candidate - this works because
 	; n is prime greater than 7, hence coprime with 30.  But different bits need different 
@@ -165,8 +176,8 @@ prime:
 
 
 	; Record how many addresses to initially scan - this is n-1 I believe
-	; carry already clear - subtract an extra 1
-	lda zp_n : sbc #0 : sta zp_setbits_count
+	; carry already set
+	lda zp_n : sbc #1 : sta zp_setbits_count
 	lda zp_n+1 : sbc #0 : sta zp_setbits_count+1
 
 	; The offset for the current bit is zero, so the base offset for our current address is
@@ -237,12 +248,25 @@ positive:
 	tay
 	clc
 
-setbits_innerloop:
+	lda zp_n+1
+	bne setbits_innerloop_large_n
+
+setbits_innerloop_small_n:
+	; Set bit Y in every nth byte after zp_setbits_addr2
+	tya : ora (zp_setbits_addr2) : sta (zp_setbits_addr2)
+	lda zp_setbits_addr2 : adc zp_n : sta zp_setbits_addr2
+	bcc setbits_innerloop_small_n
+	clc
+	inc zp_setbits_addr2+1
+	bpl setbits_innerloop_small_n
+	bra setbits_checkzeroloop_end
+
+setbits_innerloop_large_n:
 	; Set bit Y in every nth byte after zp_setbits_addr2
 	tya : ora (zp_setbits_addr2) : sta (zp_setbits_addr2)
 	lda zp_setbits_addr2 : adc zp_n : sta zp_setbits_addr2
 	lda zp_setbits_addr2+1 : adc zp_n+1 : sta zp_setbits_addr2+1
-	bpl setbits_innerloop
+	bpl setbits_innerloop_large_n
 
 setbits_checkzeroloop_end:
 
